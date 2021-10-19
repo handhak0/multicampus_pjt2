@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 파일 첨부</title>
+
+    <style>
+        
+        .title {
+            text-align: center;
+            font-weight: bolder;
+            font-size: large;
+            color: #4934c2;
+        }
+
+        .comment { 
+            text-align: center;
+            font-size: small;
+            color: blue;
+        }
+
+        .filebox { 
+            border : 2px solid #5e4cc5;
+            margin-left: 10%;
+            margin-right: 10%;
+            padding: 2%;
+
+        }
+
+        input[type = "file"] {
+
+        }
+
+        input[type = "submit"] {
+            width : 48%;
+            background-color: #5e4cc5;
+            border: 2px solid #5e4cc5;
+            color: white;
+            padding: 16px 32px;
+            text-decoration: none;
+            margin: 4px 1px;
+            border-radius: 10px;
+            cursor: pointer;
+
+        }
+        input[type=reset] {
+            width : 48%;
+            background-color: white;
+            border: 2px solid #5e4cc5;
+            color: #5e4cc5;
+            padding: 16px 32px;
+            text-decoration: none;
+            margin: 4px 1px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+
+        
+    </style>
+</head>
+<body>
+
+    <div class = "title">코로나19 방문자 출입 명단 제출</div>
+    <br>
+
+    <div>    
+        <form method="post" action = "/info">
+            <div class="filebox">
+                <div class = "comment">코로나19 방문자 출입 명단 사진을 첨부해주세요.</div>
+                <div class = "comment">※명단이 기울어지지 않게 사진을 찍어주세요.</div>
+                <input type = "file" name = "FileName">
+                <br>
+                <br>
+                <input type = "submit" value = "제출"> &nbsp;<input type = "reset" value="취소"/>
+            </div>
+
+        </form>
+    </div>
+</body>
+</html>
