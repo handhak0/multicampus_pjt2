@@ -101,6 +101,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
         # 공백제거
         for col in ['date', 'time', 'checkbox', 'sigungu', 'tel', 'extra']:
             df[col] = df[col].str.replace(' ', '')
+            df[col] = df[col].str.replace('.', '')
 
 
         # 전화번호 형식 통일
@@ -178,6 +179,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
         # 공백제거
         for col in ['date', 'time', 'sigungu', 'tel']:
             df[col] = df[col].str.replace(' ', '')
+            df[col] = df[col].str.replace('.', '')
 
         # 전화번호 형식 통일
         for col in ['tel']:
@@ -253,6 +255,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
         # 공백 제거
         for col in ['date', 'time', 'sigungu', 'tel']:
             df[col] = df[col].str.replace(' ', '')
+            df[col] = df[col].str.replace('.', '')
 
 
         # 비고(체온) 형식 통일
@@ -265,7 +268,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df[col] = df[col].str.replace('-', '')
             df[col] = df[col].str.replace(',', '')
             df[col] = df[col].str.replace('~', '')
-            df[col] = df[col].str.replace('.','')
+
 
         # 010 미표기 처리
         for i in range(len(df)):
@@ -293,6 +296,71 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                     df['time'][i] = df['time'][i][0] + ':' + df['time'][i][1:]
                 else:
                     df['time'][i] = df['time'][i][0:2] + ':' + df['time'][i][2:]
+
+    elif table_num == 11127:
+        # 날짜
+        date = res['images'][0]['fields'][0]['inferText'].split('\n')
+        # 시간
+        time = res['images'][0]['fields'][1]['inferText'].split('\n')
+        # 수집동의
+        checkbox = res['images'][0]['fields'][2]['inferText'].split('\n')
+        # 전화번호
+        tel = res['images'][0]['fields'][3]['inferText'].split('\n')
+        # 시군구 + 비고
+        sigungu = res['images'][0]['fields'][4]['inferText'].split('\n')
+
+        # max length
+        length = 0
+        li = [date, time, checkbox, sigungu, tel]
+        for i in li:
+            length = max(len(i), length)
+
+        # 패딩 맞춰주기
+        import numpy as np
+        df_li = []
+        for i in li:
+            df_li.append(np.pad(i, (0, length - len(i)), 'constant', constant_values=0))
+
+        import pandas as pd
+        df = pd.DataFrame(df_li).transpose()
+        df.columns = ['date', 'time', 'checkbox', 'sigungu', 'tel']
+
+        df['extra'] = '-'
+
+        for i in df[df.sigungu.str.contains('외')].index:
+            # '외'이후를 extra에 저장
+            df.extra[i] = df[df.sigungu.str.contains('외')].sigungu[i].split(' ')[1] + ' ' + \
+                          df[df.sigungu.str.contains('외')].sigungu[i].split(' ')[2]
+            # sigungu에서 '외'이후 버림
+            df.sigungu[i] = df[df.sigungu.str.contains('외')].sigungu[i].split(' ')[0]
+
+        # 공백 및 특수문자 제거
+        for col in ['date', 'time', 'checkbox', 'sigungu', 'tel']:
+            df[col] = df[col].str.replace(' ', '')
+            df[col] = df[col].str.replace('.', '')
+
+        # 전화번호 형식 통일
+        for col in ['tel']:
+            df[col] = df[col].str.replace('-', '')
+
+        # 010 미표기 처리
+        for i in range(len(df)):
+            if df['tel'][i].startswith('010'):
+                df['tel'][i] = df['tel'][i][3:]
+            df['tel'][i] = '010' + '-' + df['tel'][i][0:4] + '-' + df['tel'][i][4:]
+
+        # 체크박스 형식 통일
+        df.loc[(df['checkbox'] == 'v'), 'checkbox'] = 'V'
+        df.loc[(df['checkbox'] == 'r'), 'checkbox'] = 'V'
+        df.loc[(df['checkbox'] == 'o'), 'checkbox'] = 'V'
+        df.loc[(df['checkbox'] == 'O'), 'checkbox'] = 'V'
+        df.loc[(df['checkbox'] == '0'), 'checkbox'] = 'V'
+        df.loc[(df['checkbox'] == 'ㅇ'), 'checkbox'] = 'V'
+
+        # date ' " ' 처리
+        for i in range(len(df)):
+            if df['date'][i] == '"':
+                df['date'][i] = df['date'][i - 1]
 
 
 
