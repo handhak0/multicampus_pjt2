@@ -67,11 +67,11 @@
     <br>
 
     <div>    
-        <form method="post" action = "/info">
+        <form method="post" action = "/uploadfiles/" enctype="multipart/form-data">
             <div class="filebox">
                 <div class = "comment">코로나19 방문자 출입 명단 사진을 첨부해주세요.</div>
                 <div class = "comment">※명단이 기울어지지 않게 사진을 찍어주세요.</div>
-                <input type = "file" name = "FileName">
+                <input type = "file" name = "files" multiple>
                 <br>
                 <br>
                 <input type = "submit" value = "제출"> &nbsp;<input type = "reset" value="취소"/>
