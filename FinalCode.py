@@ -180,7 +180,10 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df[col] = df[col].str.replace(' ', '')
 
         # 전화번호 형식 통일
-        df[col] = df[col].str.replace('-', '')
+        for col in ['tel']:
+            df[col] = df[col].str.replace('-', '')
+            df[col] = df[col].str.replace(',', '')
+            df[col] = df[col].str.replace('~', '')
 
         # 010 미표기 처리
         for i in range(len(df)):
@@ -262,6 +265,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df[col] = df[col].str.replace('-', '')
             df[col] = df[col].str.replace(',', '')
             df[col] = df[col].str.replace('~', '')
+            df[col] = df[col].str.replace('.','')
 
         # 010 미표기 처리
         for i in range(len(df)):
