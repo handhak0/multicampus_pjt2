@@ -21,10 +21,16 @@
             color: blue;
         }
 
+        .comment2 { 
+            font-size: medium;
+            color: rgb(67, 14, 151);
+            font-weight: bold;
+        }
+
         .filebox { 
             border : 2px solid #5e4cc5;
-            margin-left: 10%;
-            margin-right: 10%;
+            margin-left: 5%;
+            margin-right: 5%;
             padding: 2%;
 
         }
@@ -56,6 +62,26 @@
             border-radius: 10px;
             cursor: pointer;
         }
+
+        select {
+            width: 15%;
+            padding: 6px 15px;
+            border: 2px solid #5e4cc5;
+            border-radius: 10px;
+            margin : 6px 2px;
+            }
+
+        input[type=file] {
+                width : 36%;
+                background-color: white;
+                border: 2px solid #5e4cc5;
+                color: #5e4cc5;
+                padding: 10px 25px;
+                text-decoration: none;
+                margin: 4px 1px;
+                border-radius: 10px;
+                cursor: pointer;
+            }
         
 
         
@@ -71,10 +97,41 @@
             <div class="filebox">
                 <div class = "comment">코로나19 방문자 출입 명단 사진을 첨부해주세요.</div>
                 <div class = "comment">※명단이 기울어지지 않게 사진을 찍어주세요.</div>
+                
+                <br>
+                <span class = "comment2">1) 본인 작성한 명부 스타일을 골라주세요</span> 
+                
+                <select name = "table_num">
+                <option value = "11112">Type1</option>
+                <option value = "11119">Type2</option>
+                <option value = "11126">Type3</option>
+                <option value = "11127">Type4</option>
+
+                </select>
+                <br>
+                <div style = "text-align: center; width : 100%">                
+                    <table style="margin: auto;"> 
+                        <th>Type1</th>
+                        <th>Type2</th>
+                        <th>Type3</th>
+                        <th>Type4</th>
+                        <tr>
+                            <td width = 25%><img src = "../static/11112.png" style = "max-width: 100%; height: auto;"></td>
+                            <td width = 25%><img src = "../static/11119.jpg" style = "max-width: 100%; height: auto;"></td>
+                            <td width = 25%><img src = "../static/11126.jpg" style = "max-width: 100%; height: auto;"></td>
+                            <td width = 25%><img src = "../static/11127.jpg" style = "max-width: 100%; height: auto;"></td>
+                        </tr>
+
+                    </table>
+                </div>
+                <br>
+                <br>
+                <span class = "comment2">2) 파일을 첨부해주세요</span> 
                 <input type = "file" name = "files" multiple>
                 <br>
                 <br>
-                <input type = "submit" value = "제출"> &nbsp;<input type = "reset" value="취소"/>
+                <p>※아래의 버튼을 누르면 csv 파일을 다운로드 하실 수 있습니다.</p>
+                <input type = "submit" value = "다운로드"> &nbsp;<input type = "reset" value="취소"/>
             </div>
 
         </form>
