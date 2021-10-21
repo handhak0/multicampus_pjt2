@@ -169,7 +169,9 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             for i in range(df.shape[0]):
                 slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
                 slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
-                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                i_month = int(df['date'][i][:slash_idx_i])
+                i_1_month = int(df['date'][i - 1][:slash_idx_i_1])
+                if (i_month < i_1_month) or (i_1_month - i_month > 1):  # 위의 날짜의 달보다 아래 날짜의 달이 작거나 차이가 두 달 이상인 경우
                     if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
                         df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
                     else:
@@ -274,7 +276,9 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             for i in range(df.shape[0]):
                 slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
                 slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
-                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                i_month = int(df['date'][i][:slash_idx_i])
+                i_1_month = int(df['date'][i - 1][:slash_idx_i_1])
+                if (i_month < i_1_month) or (i_1_month - i_month > 1):  # 위의 날짜의 달보다 아래 날짜의 달이 작거나 차이가 두 달 이상인 경우
                     if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
                         df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
                     else:
@@ -374,7 +378,9 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             for i in range(df.shape[0]):
                 slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
                 slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
-                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                i_month = int(df['date'][i][:slash_idx_i])
+                i_1_month = int(df['date'][i - 1][:slash_idx_i_1])
+                if (i_month < i_1_month) or (i_1_month - i_month > 1):  # 위의 날짜의 달보다 아래 날짜의 달이 작거나 차이가 두 달 이상인 경우
                     if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
                         df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
                     else:
@@ -483,7 +489,9 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             for i in range(df.shape[0]):
                 slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
                 slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
-                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                i_month = int(df['date'][i][:slash_idx_i])
+                i_1_month = int(df['date'][i - 1][:slash_idx_i_1])
+                if (i_month < i_1_month) or (i_1_month - i_month > 1):  # 위의 날짜의 달보다 아래 날짜의 달이 작거나 차이가 두 달 이상인 경우
                     if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
                         df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
                     else:
