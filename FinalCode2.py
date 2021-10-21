@@ -443,17 +443,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                 if df[col][i] == '"':
                     df[col][i] = df[col][i - 1]
 
-        
-        for i in range(len(df)):
-            if df['date'][i].find('/') < 0:
-                if len(df['date'][i]) == 2:
-                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1]
-                elif len(df['date'][i]) == 3 and df['date'][i][0:2] > 9 and df['date'][i][0:2] == df['date'][i-1][0:2]:
-                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
-                elif len(df['date'][i]) == 3 and df['date'][i][0:2] > 9 and df['date'][i][0:2] != df['date'][i-1][0:2]:
-                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
-                else:
-                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
+
 
         # 날짜 형식 통일
         df['date'] = df['date'].str.replace(',', '')
