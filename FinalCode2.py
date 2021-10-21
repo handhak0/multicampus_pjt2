@@ -67,7 +67,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
 
     res = json.loads(response.text.encode('utf8'))
 
-
+    # type 1
     if table_num == 11112 :
         # 날짜
         date = res['images'][0]['fields'][0]['inferText'].split('\n')
@@ -112,12 +112,8 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
 
 
         # 전화번호 형식 통일
-        for col in ['tel']:
-            df[col] = df[col].str.replace('-', '')
-            df[col] = df[col].str.replace(',', '')
-            df[col] = df[col].str.replace('~', '')
-            df[col] = df[col].str.replace('.', '')
-
+        for kiho in ['-', ',', '~'] :
+            df['tel'] = df['tel'].str.replace(kiho, '')
 
         # 010 미표기 처리
         for i in range(len(df)):
@@ -166,7 +162,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
 
         # 날짜 / 인식
         try:
-            for i in range(df.shape[0]):
+            for i in range(1, df.shape[0]):
                 slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
                 slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
                 i_month = int(df['date'][i][:slash_idx_i])
@@ -175,12 +171,109 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                     if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
                         df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
                     else:
-                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
-                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
         except:
             pass
 
+    # type 2
+    elif table_num == 11119 :
+        # 날짜
+        date = res['images'][0]['fields'][0]['inferText'].split('\n')
+        # 시간
+        time = res['images'][0]['fields'][1]['inferText'].split('\n')
+        # 연락처
+        tel = res['images'][0]['fields'][2]['inferText'].split('\n')
+        # 시군구
+        sigungu = res['images'][0]['fields'][3]['inferText'].split('\n')
+        # 비고
+        extra = res['images'][0]['fields'][4]['inferText'].split('\n')
 
+        # max length
+        length = 0
+        li = [date, time, tel, sigungu, extra]
+        for i in li:
+            length = max(len(i), length)
+
+        # 패딩 맞춰주기
+        import numpy as np
+        df_li = []
+        for i in li:
+            df_li.append(np.pad(i, (0, length - len(i)), 'constant', constant_values=0))
+
+        import pandas as pd
+        df = pd.DataFrame(df_li).transpose()
+        df.columns = ['date', 'time', 'tel', 'sigungu', 'extra']
+
+        # 공백 제거
+        for col in ['date', 'time', 'sigungu', 'tel']:
+            df[col] = df[col].str.replace(' ', '')
+
+
+        # 비고(체온) 형식 통일
+        for col in ['extra']:
+            df[col] = df[col].str.replace(' ', '')
+            df[col] = df[col].str.replace(',', '.')
+
+        # 전화번호 형식 통일
+        for kiho in ['-', ',', '~'] :
+            df['tel'] = df['tel'].str.replace(kiho, '')
+
+        # 010 미표기 처리
+        for i in range(len(df)):
+            if df['tel'][i].startswith('010'):
+                df['tel'][i] = df['tel'][i][3:]
+            df['tel'][i] = '010' + '-' + df['tel'][i][0:4] + '-' + df['tel'][i][4:]
+
+        # ' " ' 처리
+        df.replace({'11':'"', '1/':'"', '//':'"', '/1':'"'}, inplace = True)
+
+        for i in range(len(df)):
+            for col in df.columns:
+                if df[col][i] == '"':
+                    df[col][i] = df[col][i - 1]
+
+        # 시간 형식 통일
+        for i in range(len(df)):
+            if df['time'][i].find(':') < 0:
+                if len(df['time'][i]) == 2:
+                    df['time'][i] = df['time'][i][0] + ':' + df['time'][i][1]
+                elif len(df['time'][i]) == 3:
+                    df['time'][i] = df['time'][i][0] + ':' + df['time'][i][1:]
+                else:
+                    df['time'][i] = df['time'][i][0:2] + ':' + df['time'][i][2:]
+
+        # 날짜 형식 통일
+        df['date'] = df['date'].str.replace(',', '')
+
+        for i in range(len(df)):
+            if df['date'][i].find('/') < 0:
+                if len(df['date'][i]) == 2:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] != 1 :
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] == df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] != df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                else:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
+
+        # 날짜 / 인식
+        try:
+            for i in range(1, df.shape[0]):
+                slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
+                slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
+                i_month = int(df['date'][i][:slash_idx_i])
+                i_1_month = int(df['date'][i - 1][:slash_idx_i_1])
+                if (i_month < i_1_month) or (i_1_month - i_month > 1):  # 위의 날짜의 달보다 아래 날짜의 달이 작거나 차이가 두 달 이상인 경우
+                    if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
+                        df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
+                    else:
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+        except:
+            pass
+
+    # type3
     elif table_num == 11126:
         # 날짜
         date = res['images'][0]['fields'][0]['inferText'].split('\n')
@@ -218,11 +311,8 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df[col] = df[col].str.replace(' ', '')
 
         # 전화번호 형식 통일
-        for col in ['tel']:
-            df[col] = df[col].str.replace('-', '')
-            df[col] = df[col].str.replace(',', '')
-            df[col] = df[col].str.replace('~', '')
-            df[col] = df[col].str.replace('.', '')
+        for kiho in ['-', ',', '~'] :
+            df['tel'] = df['tel'].str.replace(kiho, '')
 
         # 010 미표기 처리
         for i in range(len(df)):
@@ -273,7 +363,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
 
         # 날짜 / 인식
         try:
-            for i in range(df.shape[0]):
+            for i in range(1, df.shape[0]):
                 slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
                 slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
                 i_month = int(df['date'][i][:slash_idx_i])
@@ -282,113 +372,13 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                     if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
                         df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
                     else:
-                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
-                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
         except:
             pass
 
 
-    elif table_num == 11119 :
-        # 날짜
-        date = res['images'][0]['fields'][0]['inferText'].split('\n')
-        # 시간
-        time = res['images'][0]['fields'][1]['inferText'].split('\n')
-        # 연락처
-        tel = res['images'][0]['fields'][2]['inferText'].split('\n')
-        # 시군구
-        sigungu = res['images'][0]['fields'][3]['inferText'].split('\n')
-        # 비고
-        extra = res['images'][0]['fields'][4]['inferText'].split('\n')
 
-        # max length
-        length = 0
-        li = [date, time, tel, sigungu, extra]
-        for i in li:
-            length = max(len(i), length)
-
-        # 패딩 맞춰주기
-        import numpy as np
-        df_li = []
-        for i in li:
-            df_li.append(np.pad(i, (0, length - len(i)), 'constant', constant_values=0))
-
-        import pandas as pd
-        df = pd.DataFrame(df_li).transpose()
-        df.columns = ['date', 'time', 'tel', 'sigungu', 'extra']
-
-        # 공백 제거
-        for col in ['date', 'time', 'sigungu', 'tel']:
-            df[col] = df[col].str.replace(' ', '')
-
-
-        # 비고(체온) 형식 통일
-        for col in ['extra']:
-            df[col] = df[col].str.replace(' ', '')
-            df[col] = df[col].str.replace(',', '.')
-
-        # 전화번호 형식 통일
-        for col in ['tel']:
-            df[col] = df[col].str.replace('-', '')
-            df[col] = df[col].str.replace(',', '')
-            df[col] = df[col].str.replace('~', '')
-            df[col] = df[col].str.replace('.', '')
-
-        # 010 미표기 처리
-        for i in range(len(df)):
-            if df['tel'][i].startswith('010'):
-                df['tel'][i] = df['tel'][i][3:]
-            df['tel'][i] = '010' + '-' + df['tel'][i][0:4] + '-' + df['tel'][i][4:]
-
-        # ' " ' 처리
-        df.replace({'11':'"', '1/':'"', '//':'"', '/1':'"'}, inplace = True)
-
-        for i in range(len(df)):
-            for col in df.columns:
-                if df[col][i] == '"':
-                    df[col][i] = df[col][i - 1]
-
-        # 시간 형식 통일
-        for i in range(len(df)):
-            if df['time'][i].find(':') < 0:
-                if len(df['time'][i]) == 2:
-                    df['time'][i] = df['time'][i][0] + ':' + df['time'][i][1]
-                elif len(df['time'][i]) == 3:
-                    df['time'][i] = df['time'][i][0] + ':' + df['time'][i][1:]
-                else:
-                    df['time'][i] = df['time'][i][0:2] + ':' + df['time'][i][2:]
-
-        # 날짜 형식 통일
-        df['date'] = df['date'].str.replace(',', '')
-
-        for i in range(len(df)):
-            if df['date'][i].find('/') < 0:
-                if len(df['date'][i]) == 2:
-                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1]
-                elif len(df['date'][i]) == 3 and df['date'][i][0] != 1 :
-                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
-                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] == df['date'][i-1][1]:
-                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2]
-                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] != df['date'][i-1][1]:
-                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
-                else:
-                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
-
-        # 날짜 / 인식
-        try:
-            for i in range(df.shape[0]):
-                slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
-                slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
-                i_month = int(df['date'][i][:slash_idx_i])
-                i_1_month = int(df['date'][i - 1][:slash_idx_i_1])
-                if (i_month < i_1_month) or (i_1_month - i_month > 1):  # 위의 날짜의 달보다 아래 날짜의 달이 작거나 차이가 두 달 이상인 경우
-                    if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
-                        df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
-                    else:
-                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
-                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
-        except:
-            pass
-
+    # type 4
     elif table_num == 11127:
         # 날짜
         date = res['images'][0]['fields'][0]['inferText'].split('\n')
@@ -432,11 +422,8 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df[col] = df[col].str.replace('.', '')
 
         # 전화번호 형식 통일
-        for col in ['tel']:
-            df[col] = df[col].str.replace('-', '')
-            df[col] = df[col].str.replace(',', '')
-            df[col] = df[col].str.replace('~', '')
-            df[col] = df[col].str.replace('.', '')
+        for kiho in ['-', ',', '~'] :
+            df['tel'] = df['tel'].str.replace(kiho, '')
 
         # 010 미표기 처리
         for i in range(len(df)):
@@ -486,7 +473,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
 
         # 날짜 / 인식
         try:
-            for i in range(df.shape[0]):
+            for i in range(1, df.shape[0]):
                 slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
                 slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
                 i_month = int(df['date'][i][:slash_idx_i])
@@ -495,8 +482,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                     if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
                         df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
                     else:
-                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
-                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(int(df['date'][i-1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
         except:
             pass
 
