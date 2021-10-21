@@ -7,18 +7,33 @@
     <title>이미지 파일 첨부</title>
 
     <style>
-        
+        @import url(//fonts.googleapis.com/earlyaccess/notosanskr.css);
+
+        .main { 
+            background-color: #5e4cc5;
+            border-radius: 30px;
+        }
         .title {
             text-align: center;
             font-weight: bolder;
-            font-size: large;
-            color: #4934c2;
+            font-size: 20px;
+            color: white;
+        }
+
+        .jo {
+            margin : 3px; 
+            color : white;
+            font-weight: bold;
+            font-size: medium;
+            text-align: left;
         }
 
         .comment { 
-            text-align: center;
+            text-align: left;
             font-size: small;
-            color: blue;
+            color: rgb(253, 14, 54);
+            font-weight: bold;
+            margin: 3px;
         }
 
         .comment2 { 
@@ -27,17 +42,24 @@
             font-weight: bold;
         }
 
+        
+        .comment3 { 
+            font-size: small;
+            color: rgb(67, 14, 151);
+            font-weight: bold;
+        }
+
         .filebox { 
             border : 2px solid #5e4cc5;
-            margin-left: 5%;
-            margin-right: 5%;
+            margin-left: 0%;
+            margin-right: 0%;
             padding: 2%;
+            background-color: white;
+            border-radius: 30px 30px 0px 0px;
+            box-shadow: 0px 3px 1px 1px inset #5e4cc5;
 
         }
 
-        input[type = "file"] {
-
-        }
 
         input[type = "submit"] {
             width : 48%;
@@ -69,6 +91,7 @@
             border: 2px solid #5e4cc5;
             border-radius: 10px;
             margin : 6px 2px;
+            box-shadow: 0px 1px 2px  #5e4cc5;
             }
 
         input[type=file] {
@@ -78,25 +101,31 @@
                 color: #5e4cc5;
                 padding: 10px 25px;
                 text-decoration: none;
-                margin: 4px 1px;
+                margin: 10px 0px 0px 0px;
                 border-radius: 10px;
                 cursor: pointer;
+                box-shadow: 0px 1px 2px  #5e4cc5;
             }
+
+        html{
+            font-family: "Noto Sans KR";
+        }
         
 
         
     </style>
 </head>
 <body>
-
-    <div class = "title">코로나19 방문자 출입 명단 제출</div>
+<div class = 'main'>
     <br>
+    <div class = "title">코로나19 방문자 출입 명단 제출</div>
+
+    <div class = 'jo'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3조 ㅣ 어서오삼</div>
 
     <div>    
         <form method="post" action = "/uploadfiles/" enctype="multipart/form-data">
             <div class="filebox">
-                <div class = "comment">코로나19 방문자 출입 명단 사진을 첨부해주세요.</div>
-                <div class = "comment">※명단이 기울어지지 않게 사진을 찍어주세요.</div>
+                
                 
                 <br>
                 <span class = "comment2">1) 작성한 명단 타입을 선택해주세요. </span> 
@@ -126,15 +155,17 @@
                 </div>
                 <br>
                 <br>
-                <span class = "comment2">2) 파일을 첨부해주세요</span> 
+                <span class = "comment2">2) 코로나19 방문자 출입 명단 사진을 첨부해주세요.</span>
+                <div class = "comment">※명단이 기울어지지 않게 사진을 찍어주세요.</div> 
                 <input type = "file" name = "files" multiple>
                 <br>
                 <br>
-                <p>※아래의 버튼을 누르면 csv 파일을 다운로드 하실 수 있습니다.</p>
+                <p class = "comment3">※아래의 버튼을 누르면 csv 파일을 다운로드 하실 수 있습니다.</p>
                 <input type = "submit" value = "다운로드"> &nbsp;<input type = "reset" value="취소"/>
             </div>
 
         </form>
     </div>
+</div>
 </body>
 </html>

@@ -126,7 +126,7 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df['tel'][i] = '010' + '-' + df['tel'][i][0:4] + '-' + df['tel'][i][4:]
 
         # 체크박스 형식 통일
-        for i in ['v', 'r', 'o', 'O', '0', 'ㅇ']:
+        for i in ['v', 'r', 'o', 'O', '0', 'ㅇ','○','b','6','9']:
             df.loc[(df['checkbox'] == i), 'checkbox'] = 'V'
 
 
@@ -147,6 +147,37 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                     df['time'][i] = df['time'][i][0] + ':' + df['time'][i][1:]
                 else:
                     df['time'][i] = df['time'][i][0:2] + ':' + df['time'][i][2:]
+
+        # 날짜 형식 통일
+        df['date'] = df['date'].str.replace(',', '')
+
+        for i in range(len(df)):
+            if df['date'][i].find('/') < 0:
+                if len(df['date'][i]) == 2:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] != 1 :
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] == df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] != df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                else:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
+
+        # 날짜 / 인식
+        try:
+            for i in range(df.shape[0]):
+                slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
+                slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
+                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                    if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
+                        df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
+                    else:
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
+                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+        except:
+            pass
+
 
     elif table_num == 11126:
         # 날짜
@@ -198,13 +229,8 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df['tel'][i] = '010' + '-' + df['tel'][i][0:4] + '-' + df['tel'][i][4:]
 
         # 체크박스 형식 통일
-        df.loc[(df['checkbox'] == 'v'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'r'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'o'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'O'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == '0'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'ㅇ'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == '·'), 'checkbox'] = 'V'
+        for i in ['v', 'r', 'o', 'O', '0', 'ㅇ','○','b','6','9']:
+            df.loc[(df['checkbox'] == i), 'checkbox'] = 'V'
 
         # ' " ' 처리
         df.replace({'11':'"', '1/':'"', '//':'"', '/1':'"'}, inplace = True)
@@ -226,6 +252,36 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                     df['time'][i] = df['time'][i][0:2] + ':' + df['time'][i][2:]
         
         df['time'] = df['time'].str.replace('.', '')
+
+        # 날짜 형식 통일
+        df['date'] = df['date'].str.replace(',', '')
+
+        for i in range(len(df)):
+            if df['date'][i].find('/') < 0:
+                if len(df['date'][i]) == 2:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] != 1 :
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] == df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] != df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                else:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
+
+        # 날짜 / 인식
+        try:
+            for i in range(df.shape[0]):
+                slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
+                slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
+                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                    if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
+                        df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
+                    else:
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
+                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+        except:
+            pass
 
 
     elif table_num == 11119 :
@@ -297,6 +353,36 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                 else:
                     df['time'][i] = df['time'][i][0:2] + ':' + df['time'][i][2:]
 
+        # 날짜 형식 통일
+        df['date'] = df['date'].str.replace(',', '')
+
+        for i in range(len(df)):
+            if df['date'][i].find('/') < 0:
+                if len(df['date'][i]) == 2:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] != 1 :
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] == df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] != df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                else:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
+
+        # 날짜 / 인식
+        try:
+            for i in range(df.shape[0]):
+                slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
+                slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
+                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                    if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
+                        df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
+                    else:
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
+                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+        except:
+            pass
+
     elif table_num == 11127:
         # 날짜
         date = res['images'][0]['fields'][0]['inferText'].split('\n')
@@ -353,13 +439,8 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
             df['tel'][i] = '010' + '-' + df['tel'][i][0:4] + '-' + df['tel'][i][4:]
 
         # 체크박스 형식 통일
-        df.loc[(df['checkbox'] == 'v'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'r'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'o'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'O'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == '0'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == 'ㅇ'), 'checkbox'] = 'V'
-        df.loc[(df['checkbox'] == '·'), 'checkbox'] = 'V'
+        for i in ['v', 'r', 'o', 'O', '0', 'ㅇ','○','b','6','9']:
+            df.loc[(df['checkbox'] == i), 'checkbox'] = 'V'
 
         # ' " ' 처리
         df.replace({'11':'"', '1/':'"', '//':'"', '/1':'"'}, inplace = True)
@@ -380,7 +461,37 @@ async def image(files: UploadFile = File(...), table_num : int = Form(...)):
                     df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
                 else:
                     df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
-                
+
+        # 날짜 형식 통일
+        df['date'] = df['date'].str.replace(',', '')
+
+        for i in range(len(df)):
+            if df['date'][i].find('/') < 0:
+                if len(df['date'][i]) == 2:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] != 1 :
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] == df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2]
+                elif len(df['date'][i]) == 3 and df['date'][i][0] == 1 and df['date'][i][1] != df['date'][i-1][1]:
+                    df['date'][i] = df['date'][i][0] + '/' + df['date'][i][1:]
+                else:
+                    df['date'][i] = df['date'][i][0:2] + '/' + df['date'][i][2:]
+
+        # 날짜 / 인식
+        try:
+            for i in range(df.shape[0]):
+                slash_idx_i = df['date'][i].find('/')  # i번째 날짜의 '/' 위치
+                slash_idx_i_1 = df['date'][i - 1].find('/')  # i-1번째 날짜의 '/' 위치
+                if int(df['date'][i][:slash_idx_i]) < int(df['date'][i - 1][:slash_idx_i_1]):  # 위의 날짜의 달보다 아래 날짜의 달이 크면
+                    if df['date'][i][-1] == df['date'][i - 1][-1]:  # 만약에 위의 날짜의 일자의 마지막 글자와 아래 날짜의 마지막 글자가 같으면
+                        df['date'][i] = df['date'][i - 1]  # 날짜가 같다는 거니깐 그대로 넣어줌
+                    else:
+                        df['date'][i] = df['date'][i - 1][:slash_idx_i_1] + '/' + str(
+                            int(df['date'][i - 1][slash_idx_i_1 + 1:]) + 1)  # 다르면 하루 증가한 값 넣어줌
+        except:
+            pass
+
 
 
 
