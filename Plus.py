@@ -287,12 +287,12 @@ async def image(files: List[UploadFile] = File(...), table_num : int = Form(...)
             df_temp = making_df(li, col_names, 'sigungu')
 
         df = pd.concat([df, df_temp]) # 생성된 애들 계속 합치기
-    df.to_csv('./output/covid19.csv', index= False)
+    df.to_excel('./output/covid19.xlsx', index= False)
 
 
     # file 보내주기
-    file_path = './output/covid19.csv'
-    return FileResponse(path= file_path, filename='covid19.csv')
+    file_path = './output/covid19.xlsx'
+    return FileResponse(path= file_path, filename='covid19.xlsx')
 
 
 
